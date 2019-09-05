@@ -42,6 +42,10 @@ module.exports = {
 
   crypto: isBrowser ? require("crypto-browserify") : require("crypto"),
 
+  ZkDexPrivateKey,
+  ZkDexPublicKey,
+  ZkDexAddress,
+
   constants: {
 
     // Symmetric cipher for private key encryption
