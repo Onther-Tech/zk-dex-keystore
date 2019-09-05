@@ -11,6 +11,18 @@ var sjcl = require("sjcl");
 var uuid = require("uuid");
 var secp256k1 = require("secp256k1/elliptic");
 var createKeccakHash = require("keccak/js");
+const { PublicKey, PrivateKey } = require('babyjubjub');
+
+const {
+  getSkHex,
+} = require('./lib/utils');
+
+const {
+  ZkDexPrivateKey,
+  ZkDexPublicKey,
+  ZkDexAddress
+} = require('./lib/Account');
+
 
 function isFunction(f) {
   return typeof f === "function";
@@ -22,7 +34,7 @@ function keccak256(buffer) {
 
 module.exports = {
 
-  version: "1.1.0",
+  version: "0.0.1",
 
   browser: isBrowser,
 
@@ -139,21 +151,12 @@ module.exports = {
   },
 
   /**
-   * Derive Ethereum address from private key.
-   * @param {Buffer|string} privateKey ECDSA private key.
-   * @return {string} Hex-encoded Ethereum address.
+   * Derive Zk-Dex address from private key.
+   * @param {Buffer|string} privateKey EDDSA private key.
+   * @return {string} zk-DEX address (base58-encoded with 'zk' prefix)
    */
   privateKeyToAddress: function (privateKey) {
-    var privateKeyBuffer, publicKey;
-    privateKeyBuffer = this.str2buf(privateKey);
-    if (privateKeyBuffer.length < 32) {
-      privateKeyBuffer = Buffer.concat([
-        Buffer.alloc(32 - privateKeyBuffer.length, 0),
-        privateKeyBuffer
-      ]);
-    }
-    publicKey = secp256k1.publicKeyCreate(privateKeyBuffer, false).slice(1);
-    return "0x" + keccak256(publicKey).slice(-20).toString("hex");
+    return new ZkDexPrivateKey(privateKey).toAddress().toString();
   },
 
   /**
@@ -306,8 +309,7 @@ module.exports = {
     ivBytes = params.ivBytes || this.constants.ivBytes;
 
     function checkBoundsAndCreateObject(randomBytes) {
-      var privateKey = randomBytes.slice(0, keyBytes);
-      if (!secp256k1.privateKeyVerify(privateKey)) return self.create(params, cb);
+      var privateKey = self.str2buf(getSkHex()).slice(0, keyBytes);
       return {
         privateKey: privateKey,
         iv: randomBytes.slice(keyBytes, keyBytes + ivBytes),
