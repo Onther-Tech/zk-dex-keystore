@@ -1,6 +1,6 @@
 {
   "name": "zk-dex-keystore",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Create, import and export zk-DEX keys and accounts",
   "main": "index.js",
   "directories": {
